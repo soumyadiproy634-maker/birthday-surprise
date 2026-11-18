@@ -1,10 +1,261 @@
 <!DOCTYPE html>
-<html>
+<html lang="bn">
 <head>
 <meta charset="UTF-8">
-<title>Birthday</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#180025">
+<title>Happy Birthday Bonu</title>
+
+<style>
+*{
+ box-sizing:border-box;
+}
+
+body{
+ margin:0;
+ min-height:100vh;
+ overflow:hidden;
+ background:radial-gradient(circle,#4a075b,#190027 65%,#080014);
+ color:white;
+ font-family:"Noto Sans Bengali","Noto Sans",sans-serif;
+}
+
+#confetti{
+ position:fixed;
+ inset:0;
+ width:100%;
+ height:100%;
+ pointer-events:none;
+ z-index:5;
+}
+
+.container{
+ min-height:100vh;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ text-align:center;
+ padding:20px;
+ position:relative;
+ z-index:2;
+}
+
+.cake{
+ font-size:75px;
+ margin-bottom:15px;
+ animation:bounce 1.2s infinite alternate;
+}
+
+@keyframes bounce{
+ to{transform:translateY(-15px)}
+}
+
+h1{
+ font-size:clamp(30px,8vw,55px);
+ color:#ffb5e9;
+ text-shadow:0 0 10px #ff00bb,0 0 30px #ff00bb;
+ opacity:0;
+ animation:showText 1.5s ease 1s forwards;
+}
+
+h2{
+ font-size:clamp(35px,10vw,65px);
+ color:#fff;
+ text-shadow:0 0 12px #ff36c7,0 0 35px #d900ff;
+ opacity:0;
+ animation:showText 1.5s ease 2s forwards,glow 2s infinite alternate 3.5s;
+}
+
+.message{
+ color:#ffe0fa;
+ font-size:clamp(17px,4.5vw,23px);
+ line-height:2;
+ opacity:0;
+ animation:showText 1.5s ease 3s forwards;
+}
+
+@keyframes showText{
+ from{
+  opacity:0;
+  transform:translateY(40px) scale(.8);
+ }
+ to{
+  opacity:1;
+  transform:translateY(0) scale(1);
+ }
+}
+
+@keyframes glow{
+ from{text-shadow:0 0 10px #ff00bb}
+ to{text-shadow:0 0 30px #ff00bb,0 0 55px #b000ff}
+}
+
+.heart{
+ font-size:35px;
+ animation:heartbeat 1s infinite alternate;
+}
+
+@keyframes heartbeat{
+ to{transform:scale(1.3)}
+}
+
+.balloon{
+ position:fixed;
+ bottom:-100px;
+ z-index:1;
+ font-size:35px;
+ animation:floatUp linear infinite;
+ pointer-events:none;
+}
+
+@keyframes floatUp{
+ to{
+  transform:translateY(-120vh) rotate(25deg);
+ }
+}
+
+.footer{
+ position:fixed;
+ bottom:12px;
+ left:0;
+ width:100%;
+ text-align:center;
+ font-size:13px;
+ color:#dcb4ed;
+ z-index:3;
+}
+</style>
 </head>
+
 <body>
-<h1>Happy Birthday Bonu!</h1>
+
+<canvas id="confetti"></canvas>
+
+<div class="container">
+ <div class="cake">🎂</div>
+ <h1>HAPPY BIRTHDAY</h1>
+ <h2>বোনু ❤️</h2>
+
+ <div class="message">
+  তোমার জীবনের প্রতিটি দিন<br>
+  আনন্দ ও ভালোবাসায় ভরে উঠুক।<br>
+  তোমার সব স্বপ্ন পূরণ হোক।<br>
+  সবসময় হাসিখুশি থেকো! ✨
+ </div>
+
+ <div class="heart">💖</div>
+ <p>অনেক অনেক শুভেচ্ছা ও ভালোবাসা</p>
+ <h3>From: Soumyadip 💌</h3>
+</div>
+
+<div class="footer">Made with love ❤️</div>
+
+<script>
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+
+let W=0;
+let H=0;
+let particles=[];
+
+const colors=[
+ "#ff0055","#ffcc00","#00e5ff",
+ "#aaff00","#ff66cc","#ffffff",
+ "#a855f7","#ff8800"
+];
+
+function resize(){
+ W=canvas.width=window.innerWidth;
+ H=canvas.height=window.innerHeight;
+}
+
+window.addEventListener("resize",resize);
+resize();
+
+function explosion(x,y,count){
+ for(let i=0;i<count;i++){
+  const angle=Math.random()*Math.PI*2;
+  const speed=2+Math.random()*9;
+
+  particles.push({
+   x:x,
+   y:y,
+   vx:Math.cos(angle)*speed,
+   vy:Math.sin(angle)*speed,
+   size:3+Math.random()*7,
+   color:colors[Math.floor(Math.random()*colors.length)],
+   rotation:Math.random()*6,
+   spin:(Math.random()-.5)*.3,
+   life:100+Math.random()*70
+  });
+ }
+}
+
+function animate(){
+ ctx.clearRect(0,0,W,H);
+
+ for(let i=particles.length-1;i>=0;i--){
+  const p=particles[i];
+
+  p.x+=p.vx;
+  p.y+=p.vy;
+  p.vy+=0.055;
+  p.vx*=0.993;
+  p.rotation+=p.spin;
+  p.life--;
+
+  ctx.save();
+  ctx.translate(p.x,p.y);
+  ctx.rotate(p.rotation);
+  ctx.fillStyle=p.color;
+  ctx.globalAlpha=Math.min(1,p.life/35);
+  ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*1.6);
+  ctx.restore();
+
+  if(p.life<=0){
+   particles.splice(i,1);
+  }
+ }
+
+ requestAnimationFrame(animate);
+}
+
+animate();
+
+function randomExplosion(){
+ explosion(
+  Math.random()*W,
+  Math.random()*H*.65,
+  130
+ );
+}
+
+function createBalloons(){
+ const balloonList=["🎈","💖","✨","🎊"];
+
+ for(let i=0;i<16;i++){
+  const b=document.createElement("div");
+  b.className="balloon";
+  b.textContent=balloonList[i%balloonList.length];
+  b.style.left=Math.random()*100+"%";
+  b.style.animationDuration=(7+Math.random()*8)+"s";
+  b.style.animationDelay=(Math.random()*8)+"s";
+  document.body.appendChild(b);
+ }
+}
+
+window.addEventListener("load",()=>{
+ explosion(W/2,H*.35,220);
+
+ setTimeout(()=>explosion(W*.2,H*.4,150),600);
+ setTimeout(()=>explosion(W*.8,H*.4,150),1200);
+ setTimeout(()=>explosion(W*.5,H*.2,180),2200);
+
+ setInterval(randomExplosion,3500);
+ createBalloons();
+});
+</script>
+
 </body>
 </html>
